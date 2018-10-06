@@ -1,0 +1,27 @@
+sudo: false
+language: generic
+addons:
+  apt:
+    packages:
+      - libgmp-dev
+      - valgrind
+      - equivs
+      - graphviz
+      - chrpath
+      - fakeroot
+os: linux
+before_install:
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+- sudo apt-get install --no-install-recommends texlive-fonts-recommended texlive-latex-extra texlive-fonts-extra texlive-latex-recommended dvipng
+- sudo pip install rst2pdf
+
+install:
+- stack --no-terminal --install-ghc test --only-dependencies
+
+script:
+- pushd smudge && make package ; popd
+- pushd smear && make libsmear-dev_version.deb ; popd
+- make smudge-splat_version.deb
